@@ -1,0 +1,34 @@
+# Copy to .github/workflows/legiscan-sync.yml in your GitHub repo, next to sync/legiscan-sync.mjs.
+# Repo secrets: LEGISCAN_API_KEY, INGEST_SECRET. Repo variables: NFRMD_API, STATES (e.g. CO,TX, or ALL = all 50 states).
+# Written in JSON-style YAML on purpose: it stays valid even if copy-paste strips the indentation.
+# Cron 15 10 * * * = daily ~5:15 AM Eastern. The cache remembers which bill texts and roll calls were already sent.
+# MAX_QUERIES_PER_RUN 950 = ~28k LegiScan queries/month against their 30k cap; the backfill paces itself across days.
+{
+"name": "LegiScan sync",
+"on": {
+"schedule": [{ "cron": "15 10 * * *" }],
+"workflow_dispatch": {}
+},
+"jobs": {
+"sync": {
+"runs-on": "ubuntu-latest",
+"timeout-minutes": 120,
+"steps": [
+{ "uses": "actions/checkout@v4" },
+{ "uses": "actions/setup-node@v4", "with": { "node-version": 20 } },
+{ "uses": "actions/cache@v4", "with": { "path": ".legiscan-state.json", "key": "legiscan-state-${{ github.run_id }}", "restore-keys": "legiscan-state-" } },
+{
+"run": "node sync/legiscan-sync.mjs",
+"env": {
+"LEGISCAN_API_KEY": "${{ secrets.LEGISCAN_API_KEY }}",
+"INGEST_SECRET": "${{ secrets.INGEST_SECRET }}",
+"NFRMD_API": "${{ vars.NFRMD_API }}",
+"STATES": "${{ vars.STATES }}",
+"MAX_BILLS_PER_RUN": "400",
+"MAX_QUERIES_PER_RUN": "950"
+}
+}
+]
+}
+}
+}
