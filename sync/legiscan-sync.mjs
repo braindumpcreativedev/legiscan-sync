@@ -13,7 +13,7 @@
 //
 // Env: LEGISCAN_API_KEY, INGEST_SECRET, NFRMD_API (e.g. https://informed-and-loud.rork.app),
 //      STATES ("CO,TX", or "ALL" = the 50 states), optional MAX_BILLS_PER_RUN (default 400),
-//      MAX_QUERIES_PER_RUN (default 950, ~28k/month vs LegiScan's 30k cap), STATE_FILE.
+//      MAX_QUERIES_PER_RUN (default 300, ~9k/month vs LegiScan's 10k free cap, cut from 30k on 2026-10-01), STATE_FILE.
 // Node 20+, no dependencies.
 
 import fs from "node:fs";
@@ -33,7 +33,9 @@ const STATES = must("STATES").trim().toUpperCase() === "ALL"
 const MAX_BILLS = Number(process.env.MAX_BILLS_PER_RUN ?? 400);
 // Daily LegiScan query budget. The hash diff makes each run resume where the last
 // stopped, so a full-coverage backfill paces itself across days inside the monthly cap.
-let budget = Number(process.env.MAX_QUERIES_PER_RUN ?? 950);
+// LegiScan's free Public tier is 10,000 queries/month (cut from 30,000 on 2026-10-01):
+// 300/day ≈ 9k/month leaves headroom for manual runs and retries.
+let budget = Number(process.env.MAX_QUERIES_PER_RUN ?? 300);
 const STATE_FILE = process.env.STATE_FILE ?? ".legiscan-state.json";
 const BATCH = 20;
 

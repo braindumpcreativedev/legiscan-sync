@@ -2,7 +2,7 @@
 # Repo secrets: LEGISCAN_API_KEY, INGEST_SECRET. Repo variables: NFRMD_API, STATES (e.g. CO,TX, or ALL = all 50 states).
 # Written in JSON-style YAML on purpose: it stays valid even if copy-paste strips the indentation.
 # Cron 15 10 * * * = daily ~5:15 AM Eastern. The cache remembers which bill texts and roll calls were already sent.
-# MAX_QUERIES_PER_RUN 950 = ~28k LegiScan queries/month against their 30k cap; the backfill paces itself across days.
+# MAX_QUERIES_PER_RUN 300 = ~9k LegiScan queries/month against their 10k free cap (cut from 30k on 2026-10-01); the backfill paces itself across days.
 {
 "name": "LegiScan sync",
 "on": {
@@ -25,7 +25,7 @@
 "NFRMD_API": "${{ vars.NFRMD_API }}",
 "STATES": "${{ vars.STATES }}",
 "MAX_BILLS_PER_RUN": "400",
-"MAX_QUERIES_PER_RUN": "950"
+"MAX_QUERIES_PER_RUN": "300"
 }
 }
 ]
